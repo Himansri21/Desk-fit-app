@@ -2,9 +2,13 @@
   "dependencies": {
     "@neondatabase/serverless": "^1.0.1",
     "@prisma/adapter-neon": "^6.11.1",
-    "@prisma/client": "^6.11.1",
+    "@prisma/client": "^6.13.0",
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
     "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
     "ws": "^8.18.3"
   },
   "type": "module",
@@ -13,12 +17,15 @@
   "description": "none at the moment",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "cross-env NODE_ENV=test jest --runInBand",
     "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/ws": "^8.18.1"
+    "@types/ws": "^8.18.1",
+    "cross-env": "^10.0.0",
+    "jest": "^30.0.5",
+    "supertest": "^7.1.4"
   }
 }

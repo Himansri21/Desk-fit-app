@@ -4,12 +4,94 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url   = env("DATABASE_URL")
+  url      = env("DATABASE_URL") // Set this in .env
 }
 
-model User{
-  id       Int    @id @default(autoincrement())
-  username String
-  intime   Int
-  outtime  Int
+model User {
+  id                String              @id @default(uuid())
+  email             String              @unique
+  username          String              @unique
+  passwordHash      String
+  profileImage      String?             // Optional profile picture URL
+  createdAt         DateTime            @default(now())
+
+  // Relations
+  eventsCreated     Event[]             @relation("UserEvents")
+  invitesSent       EventInvite[]       @relation("UserSentInvites")
+  invitesReceived   EventInvite[]       @relation("UserReceivedInvites")
+  eventParticipants EventParticipant[]
+  posts             Post[]
+}
+
+model Event {
+  id           String             @id @default(uuid())
+  title        String
+  description  String?
+  location     String
+  startTime    DateTime
+  endTime      DateTime
+  visibility   Visibility
+  createdAt    DateTime           @default(now())
+
+  createdById  String
+  createdBy    User               @relation("UserEvents", fields: [createdById], references: [id])
+
+  // Relations
+  invites      EventInvite[]
+  participants EventParticipant[]
+  posts        Post[]
+}
+
+model EventInvite {
+  id             String        @id @default(uuid())
+  eventId        String
+  invitedUserId  String
+  invitedById    String
+  status         InviteStatus  @default(pending)
+  createdAt      DateTime      @default(now())
+
+  // Relations
+  event          Event         @relation(fields: [eventId], references: [id])
+  invitedUser    User          @relation("UserReceivedInvites", fields: [invitedUserId], references: [id])
+  invitedBy      User          @relation("UserSentInvites", fields: [invitedById], references: [id])
+
+  @@unique([eventId, invitedUserId])
+}
+
+model EventParticipant {
+  id        String    @id @default(uuid())
+  eventId   String
+  userId    String
+  joinedAt  DateTime  @default(now())
+
+  // Relations
+  event     Event     @relation(fields: [eventId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+
+  @@unique([eventId, userId])
+}
+
+model Post {
+  id          String    @id @default(uuid())
+  caption     String?
+  photoUrl    String
+  createdAt   DateTime  @default(now())
+
+  postedById  String
+  eventId     String
+
+  // Relations
+  postedBy    User      @relation(fields: [postedById], references: [id])
+  event       Event     @relation(fields: [eventId], references: [id])
+}
+
+enum Visibility {
+  public
+  private
+}
+
+enum InviteStatus {
+  pending
+  accepted
+  declined
 }
